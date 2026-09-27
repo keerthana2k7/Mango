@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "MangoVision API - Full Stack Suite",
+    "description": "Comprehensive Postman collection for all FastAPI endpoints including Auth, Farms, Trees, Cameras, Simulation, Images, Predictions, and Analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api" },
+    { "key": "access_token", "value": "" },
+    { "key": "farm_id", "value": "1" },
+    { "key": "tree_id", "value": "1" },
+    { "key": "camera_id", "value": "1" },
+    { "key": "image_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (JSON)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@mangovision.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/auth/login/json"
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Farms",
+      "item": [
+        {
+          "name": "List Farms",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/farms"
+          }
+        },
+        {
+          "name": "Get Farm Trees Grid",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/farms/{{farm_id}}/trees"
+          }
+        },
+        {
+          "name": "Get Farm Cameras",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/farms/{{farm_id}}/cameras"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Simulation",
+      "item": [
+        {
+          "name": "Get Simulation Status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/cameras/{{camera_id}}/simulation/status"
+          }
+        },
+        {
+          "name": "Start Simulation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"START\",\n  \"speed\": 1.2\n}"
+            },
+            "url": "{{base_url}}/cameras/{{camera_id}}/simulation/start"
+          }
+        },
+        {
+          "name": "Pause Simulation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cameras/{{camera_id}}/simulation/pause"
+          }
+        },
+        {
+          "name": "Step Simulation (Deterministic)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cameras/{{camera_id}}/simulation/step"
+          }
+        },
+        {
+          "name": "Reset Simulation",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cameras/{{camera_id}}/simulation/reset"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard Analytics",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/analytics/dashboard?farm_id={{farm_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "class_id": 0,
+    "name": "Anthracnose",
+    "scientific_name": "Colletotrichum gloeosporioides",
+    "severity": "HIGH",
+    "symptoms": "Dark brown to black necrotic spots with concentric rings on leaves, blossoms, and young fruits.",
+    "treatment": "Apply Copper oxychloride (0.3%) or Carbendazim (0.1%) spray. Prune dead twigs before flowering."
+  },
+  {
+    "class_id": 1,
+    "name": "Bacterial Canker",
+    "scientific_name": "Xanthomonas campestris pv. mangiferaeindicae",
+    "severity": "HIGH",
+    "symptoms": "Water-soaked angular dark lesions surrounded by clear chlorotic halos on leaves.",
+    "treatment": "Spray Streptocycline (200 ppm) combined with Copper Oxychloride (0.3%) at 15-day intervals."
+  },
+  {
+    "class_id": 2,
+    "name": "Cutting Weevil",
+    "scientific_name": "Deporaus marginatus",
+    "severity": "MEDIUM",
+    "symptoms": "Fresh young tender leaves neatly excised or cut in a straight line as if clipped by scissors.",
+    "treatment": "Spray Quinalphos 25 EC (2 ml/L) or Monocrotophos on newly emerging flushes."
+  },
+  {
+    "class_id": 3,
+    "name": "Die Back",
+    "scientific_name": "Lasiodiplodia theobromae",
+    "severity": "HIGH",
+    "symptoms": "Drying and withering of twigs from the top downwards, followed by progressive brown discoloration.",
+    "treatment": "Prune affected shoots 5-8 cm below infected zone and apply Bordeaux paste on cut surfaces."
+  },
+  {
+    "class_id": 4,
+    "name": "Gall Midge",
+    "scientific_name": "Procontarinia matteiana",
+    "severity": "MEDIUM",
+    "symptoms": "Wart-like raised galls or blister formations across upper and lower surfaces of leaves.",
+    "treatment": "Foliar spray with Dimethoate 30 EC (1.5 ml/L) or Imidacloprid (0.3 ml/L) during emergence."
+  },
+  {
+    "class_id": 5,
+    "name": "Powdery Mildew",
+    "scientific_name": "Oidium mangiferae",
+    "severity": "HIGH",
+    "symptoms": "White superficial powdery fungal growth covering leaves, panicles, and tender developing fruitlets.",
+    "treatment": "Dust with Wettable Sulphur (0.2%) or spray Dinocap (0.1%) or Hexaconazole (0.1%)."
+  },
+  {
+    "class_id": 6,
+    "name": "Sooty Mould",
+    "scientific_name": "Meliola mangiferae",
+    "severity": "MEDIUM",
+    "symptoms": "Thick black velvety superficial layer of fungal coating on leaf surface interfering with photosynthesis.",
+    "treatment": "Spray systemic insecticide to manage honeydew-secreting scales/hoppers, followed by 5% starch solution."
+  },
+  {
+    "class_id": 7,
+    "name": "Healthy",
+    "scientific_name": "Mangifera indica (Healthy)",
+    "severity": "NONE",
+    "symptoms": "Normal deep-green glossy foliage, intact leaf margins, zero fungal or necrotic lesions.",
+    "treatment": "Maintain balanced NPK fertilization, scheduled drip irrigation, and routine seasonal scouting."
+  }
+]
