@@ -7,6 +7,9 @@ from app.schemas.image import ImageBase, ImageOut
 from app.schemas.prediction import PredictionCreate, PredictionOut, PredictionBatchResult
 from app.schemas.analytics import FarmAnalyticsSummary, HealthDistribution, DiseaseCountItem
 
+from app.schemas.treatment import TreatmentCreate, TreatmentResponse
+from app.schemas.alert import AlertCreate, AlertResponse
+
 __all__ = [
     "UserCreate",
     "UserUpdate",
@@ -34,4 +37,8 @@ __all__ = [
     "FarmAnalyticsSummary",
     "HealthDistribution",
     "DiseaseCountItem",
+    "TreatmentCreate",
+    "TreatmentResponse",
+    "AlertCreate",
+    "AlertResponse",
 ]

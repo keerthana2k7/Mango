@@ -70,6 +70,7 @@ export const MangoTrees3D: React.FC<MangoTrees3DProps> = ({
           const health = liveTree?.health_status || tree.health_status;
           const isHealthy = health === 'HEALTHY';
           const isDiseased = health === 'DISEASE_DETECTED';
+          const isTreated = health === 'TREATED';
           const isInspected = currentTreeId === tree.tree_id;
           const isSelected = selectedTreeId === tree.tree_id;
           const isHovered = hoveredTreeId === tree.tree_id;
@@ -81,12 +82,16 @@ export const MangoTrees3D: React.FC<MangoTrees3DProps> = ({
           // Canopy color palette
           const primaryCanopyColor = isHealthy
             ? '#2E7D32'
+            : isTreated
+            ? '#00796B'
             : isDiseased
             ? '#6D4C41'
             : '#4B6B48';
 
           const secondaryCanopyColor = isHealthy
             ? '#43A047'
+            : isTreated
+            ? '#26A69A'
             : isDiseased
             ? '#D84315'
             : '#668763';
@@ -126,6 +131,8 @@ export const MangoTrees3D: React.FC<MangoTrees3DProps> = ({
                       ? '#0284C7'
                       : isInspected
                       ? '#F59E0B'
+                      : isTreated
+                      ? '#0D9488'
                       : isDiseased
                       ? '#E11D48'
                       : '#10B981'

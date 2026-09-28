@@ -16,11 +16,16 @@ from app.api.simulation import router as simulation_router
 from app.api.images import router as images_router
 from app.api.predictions import router as predictions_router
 from app.api.analytics import router as analytics_router
+from app.api.alerts import router as alerts_router
+from app.api.treatments import router as treatments_router
+from app.api.advisories import router as advisories_router
 from app.models.user import User, UserRole
 from app.core.security import get_password_hash
 from app.models.farm import Farm
 from app.models.tree import Tree, TreeHealthStatus
 from app.models.camera import Camera, CameraStatus
+from app.models.treatment import Treatment, TreatmentType
+from app.models.alert import Alert, AlertSeverity, AlertType
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("mangovision")
@@ -60,10 +65,10 @@ def seed_initial_admin_and_farm():
             db.refresh(farm)
             logger.info("Created default orchard: %s", farm.name)
 
-            # Create 24 trees with realistic initial health states
+            # Create 24 trees with realistic initial health states including TREATED
             tree_health_distribution = [
                 # Row 1 (Trees 1-6)
-                TreeHealthStatus.HEALTHY, TreeHealthStatus.HEALTHY, TreeHealthStatus.DISEASE_DETECTED, TreeHealthStatus.HEALTHY, TreeHealthStatus.HEALTHY, TreeHealthStatus.HEALTHY,
+                TreeHealthStatus.HEALTHY, TreeHealthStatus.HEALTHY, TreeHealthStatus.DISEASE_DETECTED, TreeHealthStatus.HEALTHY, TreeHealthStatus.TREATED, TreeHealthStatus.HEALTHY,
                 # Row 2 (Trees 7-12)
                 TreeHealthStatus.HEALTHY, TreeHealthStatus.DISEASE_DETECTED, TreeHealthStatus.HEALTHY, TreeHealthStatus.HEALTHY, TreeHealthStatus.UNKNOWN, TreeHealthStatus.HEALTHY,
                 # Row 3 (Trees 13-18)
@@ -107,6 +112,43 @@ def seed_initial_admin_and_farm():
             db.add(camera)
             db.commit()
             logger.info("Created default rail camera device")
+
+        # 4. Seed sample alert and treatment if none exist
+        if farm:
+            existing_alert = db.query(Alert).first()
+            if not existing_alert:
+                diseased_tree = db.query(Tree).filter(Tree.farm_id == farm.id, Tree.health_status == TreeHealthStatus.DISEASE_DETECTED).first()
+                if diseased_tree:
+                    alert = Alert(
+                        farm_id=farm.id,
+                        tree_id=diseased_tree.id,
+                        alert_type=AlertType.DISEASE_DETECTED,
+                        severity=AlertSeverity.HIGH,
+                        title="Pathogen Warning: Anthracnose Foliar Lesions",
+                        message=f"Overhead rail inspection detected necrotic dark spots on Tree {diseased_tree.tree_number} with 92% confidence.",
+                        is_acknowledged=False,
+                        is_resolved=False
+                    )
+                    db.add(alert)
+                    db.commit()
+                    logger.info("Seeded initial pathogen alert")
+
+            existing_treatment = db.query(Treatment).first()
+            if not existing_treatment:
+                treated_tree = db.query(Tree).filter(Tree.farm_id == farm.id, Tree.health_status == TreeHealthStatus.TREATED).first()
+                if treated_tree:
+                    treatment = Treatment(
+                        farm_id=farm.id,
+                        tree_id=treated_tree.id,
+                        chemical_name="Copper Oxychloride 50 WP",
+                        dosage="3.0 g / Litre",
+                        operator_name="Mithilesh Senior Agronomist",
+                        treatment_type=TreatmentType.CHEMICAL,
+                        notes="Preventative foliar spray applied prior to monsoon flushes.",
+                    )
+                    db.add(treatment)
+                    db.commit()
+                    logger.info("Seeded initial treatment log")
 
     except Exception as e:
         logger.error("Error during initial database seeding: %s", e)
@@ -162,6 +204,9 @@ app.include_router(simulation_router, prefix=settings.API_V1_STR)
 app.include_router(images_router, prefix=settings.API_V1_STR)
 app.include_router(predictions_router, prefix=settings.API_V1_STR)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
+app.include_router(alerts_router, prefix=settings.API_V1_STR)
+app.include_router(treatments_router, prefix=settings.API_V1_STR)
+app.include_router(advisories_router, prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["Health"])
 def health_check():

@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.simulation import SimulationControlCommand, SimulationStatusResponse
+from app.schemas.simulation import (
+    SimulationControlCommand,
+    SimulationStatusResponse,
+    SimulateDiseaseRequest,
+    SimulateDiseaseResponse
+)
 from app.services.simulation_service import simulation_engine
 
 router = APIRouter(tags=["Simulation"])
@@ -48,4 +53,18 @@ async def step_simulation(camera_id: int):
     res = await simulation_engine.step(camera_id)
     if "error" in res:
         raise HTTPException(status_code=404, detail=res["error"])
+    return res
+
+@router.post("/cameras/{camera_id}/simulation/simulate-disease", response_model=SimulateDiseaseResponse)
+async def simulate_disease(camera_id: int, req: SimulateDiseaseRequest = None):
+    req = req or SimulateDiseaseRequest()
+    res = await simulation_engine.simulate_disease(
+        camera_id=camera_id,
+        disease_name=req.disease_name,
+        tree_id=req.tree_id,
+        severity=req.severity,
+        operator_notes=req.operator_notes
+    )
+    if "error" in res:
+        raise HTTPException(status_code=400, detail=res["error"])
     return res

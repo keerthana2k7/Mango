@@ -25,10 +25,12 @@ class AnalyticsService:
         total_trees = db.query(func.count(Tree.id)).filter(Tree.farm_id == farm_id_val).scalar() or 0
         healthy_trees = db.query(func.count(Tree.id)).filter(Tree.farm_id == farm_id_val, Tree.health_status == TreeHealthStatus.HEALTHY).scalar() or 0
         diseased_trees = db.query(func.count(Tree.id)).filter(Tree.farm_id == farm_id_val, Tree.health_status == TreeHealthStatus.DISEASE_DETECTED).scalar() or 0
+        treated_trees = db.query(func.count(Tree.id)).filter(Tree.farm_id == farm_id_val, Tree.health_status == TreeHealthStatus.TREATED).scalar() or 0
         unknown_trees = db.query(func.count(Tree.id)).filter(Tree.farm_id == farm_id_val, Tree.health_status == TreeHealthStatus.UNKNOWN).scalar() or 0
 
         health_pct = round((healthy_trees / total_trees * 100.0), 1) if total_trees > 0 else 0.0
         diseased_pct = round((diseased_trees / total_trees * 100.0), 1) if total_trees > 0 else 0.0
+        treated_pct = round((treated_trees / total_trees * 100.0), 1) if total_trees > 0 else 0.0
         unknown_pct = round((unknown_trees / total_trees * 100.0), 1) if total_trees > 0 else 0.0
 
         # Disease breakdown
@@ -96,6 +98,8 @@ class AnalyticsService:
                 healthy_percentage=health_pct,
                 diseased_count=diseased_trees,
                 diseased_percentage=diseased_pct,
+                treated_count=treated_trees,
+                treated_percentage=treated_pct,
                 unknown_count=unknown_trees,
                 unknown_percentage=unknown_pct
             ),
@@ -105,5 +109,64 @@ class AnalyticsService:
             total_predictions_made=total_predictions,
             recent_activity=activity_list
         )
+
+    @staticmethod
+    def generate_orchard_audit_csv(db: Session, farm_id: Optional[int] = None) -> str:
+        import csv
+        import io
+        from app.models.treatment import Treatment
+
+        farm = db.query(Farm).filter(Farm.id == farm_id).first() if farm_id else db.query(Farm).first()
+        farm_id_val = farm.id if farm else 1
+
+        trees = db.query(Tree).filter(Tree.farm_id == farm_id_val).order_by(Tree.row_number, Tree.column_number).all()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow([
+            "Tree ID",
+            "Tree Number",
+            "Row",
+            "Column",
+            "Variety",
+            "Health Status",
+            "Last Inspected At",
+            "Latest Pathogen Detected",
+            "AI Confidence %",
+            "Recommended Agronomic Treatment",
+            "Latest Intervention Chemical",
+            "Intervention Date",
+            "Operator"
+        ])
+
+        for tree in trees:
+            latest_pred = db.query(Prediction).filter(Prediction.tree_id == tree.id).order_by(Prediction.prediction_time.desc()).first()
+            latest_treatment = db.query(Treatment).filter(Treatment.tree_id == tree.id).order_by(Treatment.treated_at.desc()).first()
+
+            pathogen = latest_pred.disease_name if latest_pred else ("Healthy" if tree.health_status == TreeHealthStatus.HEALTHY else "None")
+            confidence = f"{int(latest_pred.confidence * 100)}%" if latest_pred else "N/A"
+            recom = latest_pred.treatment_recommendation if latest_pred and latest_pred.treatment_recommendation else "Routine orchard maintenance"
+            chem = latest_treatment.chemical_name if latest_treatment else "None"
+            t_date = latest_treatment.treated_at.strftime("%Y-%m-%d %H:%M") if latest_treatment else "N/A"
+            op = latest_treatment.operator_name if latest_treatment else "N/A"
+            insp_date = tree.last_inspected_at.strftime("%Y-%m-%d %H:%M") if tree.last_inspected_at else "Not Inspected"
+
+            writer.writerow([
+                tree.id,
+                tree.tree_number,
+                tree.row_number,
+                tree.column_number,
+                tree.variety,
+                tree.health_status.value,
+                insp_date,
+                pathogen,
+                confidence,
+                recom,
+                chem,
+                t_date,
+                op
+            ])
+
+        return output.getvalue()
 
 analytics_service = AnalyticsService()

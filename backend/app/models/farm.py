@@ -20,3 +20,5 @@ class Farm(Base):
     trees = relationship("Tree", back_populates="farm", cascade="all, delete-orphan")
     cameras = relationship("Camera", back_populates="farm", cascade="all, delete-orphan")
     images = relationship("Image", back_populates="farm", cascade="all, delete-orphan")
+    treatments = relationship("Treatment", back_populates="farm", cascade="all, delete-orphan")
+    alerts = relationship("Alert", back_populates="farm", cascade="all, delete-orphan")

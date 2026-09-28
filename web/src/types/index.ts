@@ -24,7 +24,7 @@ export interface Farm {
   unknown_trees?: number;
 }
 
-export type TreeHealthStatus = 'HEALTHY' | 'DISEASE_DETECTED' | 'UNKNOWN';
+export type TreeHealthStatus = 'HEALTHY' | 'DISEASE_DETECTED' | 'TREATED' | 'UNKNOWN';
 
 export interface LatestPrediction {
   id: number;
@@ -200,6 +200,8 @@ export interface FarmAnalyticsSummary {
     healthy_percentage: number;
     diseased_count: number;
     diseased_percentage: number;
+    treated_count?: number;
+    treated_percentage?: number;
     unknown_count: number;
     unknown_percentage: number;
   };
@@ -217,3 +219,85 @@ export interface FarmAnalyticsSummary {
     prediction_time: string;
   }[];
 }
+
+export interface TreatmentRecord {
+  id: number;
+  farm_id: number;
+  tree_id: number;
+  chemical_name: string;
+  dosage?: string;
+  operator_name: string;
+  treatment_type: 'CHEMICAL' | 'ORGANIC' | 'PRUNING' | 'BIOLOGICAL';
+  notes?: string;
+  treated_at: string;
+  created_at: string;
+}
+
+export interface AlertRecord {
+  id: number;
+  farm_id: number;
+  tree_id?: number;
+  camera_id?: number;
+  alert_type: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  title: string;
+  message: string;
+  is_acknowledged: boolean;
+  is_resolved: boolean;
+  created_at: string;
+  resolved_at?: string;
+}
+
+export interface DiseaseAdvisory {
+  class_id: number;
+  name: string;
+  scientific_name: string;
+  severity: string;
+  symptoms: string;
+  treatment: string;
+}
+
+export interface SimulateDiseaseRequest {
+  disease_name?: string;
+  tree_id?: number;
+  severity?: string;
+  operator_notes?: string;
+}
+
+export interface SimulateDiseaseResponse {
+  camera_id: number;
+  farm_id: number;
+  tree_id: number;
+  tree_number: string;
+  tree_health_status: string;
+  disease_name: string;
+  scientific_name?: string;
+  confidence: number;
+  severity: string;
+  symptoms?: string;
+  treatment_recommendation?: string;
+  image_id: number;
+  image_url: string;
+  alert_id?: number;
+  alert_severity?: string;
+  simulation_status: SimulationStatus;
+}
+
+export interface BatchTreatmentRequest {
+  farm_id: number;
+  chemical_name: string;
+  dosage?: string;
+  operator_name?: string;
+  treatment_type?: 'CHEMICAL' | 'ORGANIC' | 'PRUNING' | 'BIOLOGICAL';
+  notes?: string;
+  target_health_status?: string;
+}
+
+export interface BatchTreatmentResponse {
+  farm_id: number;
+  treated_count: number;
+  chemical_name: string;
+  tree_numbers: string[];
+  message: string;
+}
+

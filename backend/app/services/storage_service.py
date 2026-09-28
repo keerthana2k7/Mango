@@ -21,8 +21,13 @@ class StorageService:
         Saves image and thumbnail to storage directory.
         Returns relative paths: (image_rel_path, thumbnail_rel_path)
         """
+        import re
+        base_slug = re.sub(r"[^a-zA-Z0-9_\-]", "_", os.path.splitext(original_filename)[0])[:40].strip("_")
         ext = os.path.splitext(original_filename)[1].lower() or ".jpg"
-        unique_name = f"{uuid.uuid4().hex}{ext}"
+        if base_slug:
+            unique_name = f"{base_slug}_{uuid.uuid4().hex[:8]}{ext}"
+        else:
+            unique_name = f"{uuid.uuid4().hex}{ext}"
         
         image_path = os.path.join(self.images_dir, unique_name)
         thumb_name = f"thumb_{unique_name}"

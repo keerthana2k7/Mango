@@ -10,7 +10,7 @@ from app.services.storage_service import storage_service
 
 class PredictionService:
     @staticmethod
-    def run_prediction_for_image(db: Session, image: Image) -> Prediction:
+    def run_prediction_for_image(db: Session, image: Image, filename_hint: Optional[str] = None) -> Prediction:
         # Resolve image file
         abs_path = storage_service.get_absolute_path(image.file_path)
         image_bytes = b""
@@ -18,8 +18,10 @@ class PredictionService:
             with open(abs_path, "rb") as f:
                 image_bytes = f.read()
 
+        effective_name = filename_hint or os.path.basename(image.file_path) or (image.image_type or "")
+
         # Run ML inference
-        diag = inference_engine.predict(image_bytes, filename=os.path.basename(image.file_path))
+        diag = inference_engine.predict(image_bytes, filename=effective_name)
 
         # Create or update prediction record
         prediction = db.query(Prediction).filter(Prediction.image_id == image.id).first()

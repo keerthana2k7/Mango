@@ -102,6 +102,7 @@ export default function MobileFarmView() {
                   {rowTrees.map((tree) => {
                     const isHealthy = tree.health_status === 'HEALTHY';
                     const isDiseased = tree.health_status === 'DISEASE_DETECTED';
+                    const isTreated = tree.health_status === 'TREATED';
                     const isInspecting = currentTreeId === tree.id;
 
                     return (
@@ -114,12 +115,14 @@ export default function MobileFarmView() {
                             ? styles.pinInspecting
                             : isHealthy
                             ? styles.pinHealthy
+                            : isTreated
+                            ? styles.pinTreated
                             : isDiseased
                             ? styles.pinDiseased
                             : styles.pinUnknown,
                         ]}
                       >
-                        <Text style={styles.treePinIcon}>🌳</Text>
+                        <Text style={styles.treePinIcon}>{isTreated ? '💊' : '🌳'}</Text>
                         <Text style={styles.treePinText}>C0{tree.column_number}</Text>
                       </TouchableOpacity>
                     );
@@ -157,6 +160,10 @@ export default function MobileFarmView() {
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#F43F5E' }]} />
             <Text style={styles.legendText}>Diseased</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#0D9488' }]} />
+            <Text style={styles.legendText}>Treated</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
@@ -211,18 +218,54 @@ export default function MobileFarmView() {
               <View
                 style={[
                   styles.statusPill,
-                  selectedTree.health_status === 'HEALTHY' ? styles.pillHealthy : styles.pillDiseased,
+                  selectedTree.health_status === 'HEALTHY'
+                    ? styles.pillHealthy
+                    : selectedTree.health_status === 'TREATED'
+                    ? styles.pillTreated
+                    : styles.pillDiseased,
                 ]}
               >
                 <Text
                   style={[
                     styles.statusPillText,
-                    selectedTree.health_status === 'HEALTHY' ? styles.pillTextHealthy : styles.pillTextDiseased,
+                    selectedTree.health_status === 'HEALTHY'
+                      ? styles.pillTextHealthy
+                      : selectedTree.health_status === 'TREATED'
+                      ? styles.pillTextTreated
+                      : styles.pillTextDiseased,
                   ]}
                 >
-                  {selectedTree.health_status === 'HEALTHY' ? 'Healthy Canopy' : 'Disease Detected: Anthracnose'}
+                  {selectedTree.health_status === 'HEALTHY'
+                    ? 'Healthy Canopy'
+                    : selectedTree.health_status === 'TREATED'
+                    ? 'Treated / In Recovery'
+                    : 'Disease Detected: Anthracnose'}
                 </Text>
               </View>
+
+              {selectedTree.health_status === 'DISEASE_DETECTED' && (
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await mobileApi.logTreatment({
+                        tree_id: selectedTree.id,
+                        chemical_name: 'Copper Oxychloride 50 WP (0.3%)',
+                        treatment_type: 'CHEMICAL',
+                        operator_name: 'Field Operator',
+                        update_tree_health: true,
+                        new_health_status: 'TREATED',
+                      });
+                      setSelectedTree({ ...selectedTree, health_status: 'TREATED' });
+                      mobileApi.getFarmTrees(1).then(setTrees).catch(() => {});
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                  style={styles.treatBtn}
+                >
+                  <Text style={styles.treatBtnText}>💊 Mark as Treated (Copper Spray)</Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity onPress={() => setSelectedTree(null)} style={styles.closeBtn}>
                 <Text style={styles.closeBtnText}>Dismiss</Text>
@@ -330,6 +373,11 @@ const styles = StyleSheet.create({
   statusPillText: { fontSize: 12, fontWeight: '800' },
   pillTextHealthy: { color: '#065F46' },
   pillTextDiseased: { color: '#9F1239' },
+  pinTreated: { backgroundColor: '#CCFBF1', borderColor: '#0D9488' },
+  pillTreated: { backgroundColor: '#CCFBF1' },
+  pillTextTreated: { color: '#0F766E' },
+  treatBtn: { width: '100%', backgroundColor: '#0D9488', paddingVertical: 12, borderRadius: 16, alignItems: 'center', marginBottom: 10 },
+  treatBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
   closeBtn: { width: '100%', backgroundColor: '#0F172A', paddingVertical: 14, borderRadius: 18, alignItems: 'center' },
   closeBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
 });

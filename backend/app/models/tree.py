@@ -7,6 +7,7 @@ from app.core.database import Base
 class TreeHealthStatus(str, enum.Enum):
     HEALTHY = "HEALTHY"
     DISEASE_DETECTED = "DISEASE_DETECTED"
+    TREATED = "TREATED"
     UNKNOWN = "UNKNOWN"
 
 class Tree(Base):
@@ -33,3 +34,5 @@ class Tree(Base):
     farm = relationship("Farm", back_populates="trees")
     images = relationship("Image", back_populates="tree", cascade="all, delete-orphan")
     predictions = relationship("Prediction", back_populates="tree", cascade="all, delete-orphan")
+    treatments = relationship("Treatment", back_populates="tree", cascade="all, delete-orphan")
+    alerts = relationship("Alert", back_populates="tree", cascade="all, delete-orphan")

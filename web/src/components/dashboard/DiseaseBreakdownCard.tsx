@@ -4,9 +4,10 @@ import { FarmAnalyticsSummary, DiseaseCountItem } from '../../types';
 
 interface DiseaseBreakdownCardProps {
   analytics: FarmAnalyticsSummary | null;
+  onSelectDisease?: (diseaseName: string) => void;
 }
 
-export const DiseaseBreakdownCard: React.FC<DiseaseBreakdownCardProps> = ({ analytics }) => {
+export const DiseaseBreakdownCard: React.FC<DiseaseBreakdownCardProps> = ({ analytics, onSelectDisease }) => {
   const breakdown: DiseaseCountItem[] = analytics?.disease_breakdown || [
     { disease_name: 'Anthracnose', count: 2, percentage: 50.0, severity: 'HIGH' },
     { disease_name: 'Powdery Mildew', count: 1, percentage: 25.0, severity: 'HIGH' },
@@ -20,10 +21,10 @@ export const DiseaseBreakdownCard: React.FC<DiseaseBreakdownCardProps> = ({ anal
           <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">Active Disease Pathogens</h3>
           <span className="text-xs font-bold text-slate-400">Cases</span>
         </div>
-        <p className="text-xs text-slate-400 font-medium mb-4">ML multi-class classification detections</p>
+        <p className="text-xs text-slate-400 font-medium mb-4">ML multi-class classification detections • Click to triage</p>
 
         {/* Disease Items List */}
-        <div className="space-y-3.5">
+        <div className="space-y-3">
           {breakdown.length === 0 ? (
             <div className="py-8 text-center text-xs font-medium text-slate-400">
               No disease outbreaks detected in this orchard block.
@@ -32,15 +33,19 @@ export const DiseaseBreakdownCard: React.FC<DiseaseBreakdownCardProps> = ({ anal
             breakdown.map((item, idx) => {
               const isHigh = item.severity === 'HIGH';
               return (
-                <div key={idx} className="space-y-1.5">
+                <div
+                  key={idx}
+                  onClick={() => onSelectDisease && onSelectDisease(item.disease_name)}
+                  className="space-y-1.5 p-2 rounded-2xl hover:bg-slate-50 cursor-pointer transition group"
+                >
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${isHigh ? 'bg-rose-500' : 'bg-amber-500'}`} />
-                      <span className="font-bold text-slate-800">{item.disease_name}</span>
+                      <span className="font-bold text-slate-800 group-hover:text-emerald-700 transition">{item.disease_name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400 font-normal">{item.percentage}%</span>
-                      <span className="font-bold text-slate-800 px-2 py-0.5 rounded-lg bg-slate-100 text-[11px]">
+                      <span className="font-bold text-slate-800 px-2 py-0.5 rounded-lg bg-slate-100 group-hover:bg-slate-200 text-[11px] transition">
                         {item.count} {item.count === 1 ? 'tree' : 'trees'}
                       </span>
                     </div>

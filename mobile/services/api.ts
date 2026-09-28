@@ -96,6 +96,22 @@ class MobileApiClient {
   async getPredictions(farmId: number) {
     return this.request<any[]>(`/predictions/farm/${farmId}`);
   }
+
+  async getAlerts(farmId?: number) {
+    const q = farmId ? `?farm_id=${farmId}` : '';
+    return this.request<any[]>(`/alerts${q}`);
+  }
+
+  async logTreatment(payload: any) {
+    return this.request<any>('/treatments', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getAdvisories() {
+    return this.request<any[]>('/advisories');
+  }
 }
 
 export const mobileApi = new MobileApiClient();

@@ -6,7 +6,12 @@ import {
   SimulationStatus,
   ImageRecord,
   PredictionRecord,
-  FarmAnalyticsSummary
+  FarmAnalyticsSummary,
+  TreatmentRecord,
+  AlertRecord,
+  DiseaseAdvisory,
+  SimulateDiseaseRequest,
+  SimulateDiseaseResponse
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -147,6 +152,16 @@ class ApiClient {
     });
   }
 
+  async simulateDisease(
+    cameraId: number,
+    data?: SimulateDiseaseRequest
+  ): Promise<SimulateDiseaseResponse> {
+    return this.request<SimulateDiseaseResponse>(`/cameras/${cameraId}/simulation/simulate-disease`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
   // Analytics
   async getAnalytics(farmId?: number): Promise<FarmAnalyticsSummary> {
     const query = farmId ? `?farm_id=${farmId}` : '';
@@ -167,6 +182,80 @@ class ApiClient {
       method: 'POST',
       body: formData,
     });
+  }
+
+  // Alerts
+  async getAlerts(farmId?: number, unresolvedOnly: boolean = false): Promise<AlertRecord[]> {
+    const params = new URLSearchParams();
+    if (farmId) params.append('farm_id', farmId.toString());
+    if (unresolvedOnly) params.append('unresolved_only', 'true');
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return this.request<AlertRecord[]>(`/alerts${qs}`);
+  }
+
+  async getActiveAlertsCount(farmId?: number): Promise<{ active_alerts_count: number }> {
+    const qs = farmId ? `?farm_id=${farmId}` : '';
+    return this.request<{ active_alerts_count: number }>(`/alerts/active-count${qs}`);
+  }
+
+  async acknowledgeAlert(alertId: number): Promise<AlertRecord> {
+    return this.request<AlertRecord>(`/alerts/${alertId}/acknowledge`, {
+      method: 'POST',
+    });
+  }
+
+  async resolveAlert(alertId: number): Promise<AlertRecord> {
+    return this.request<AlertRecord>(`/alerts/${alertId}/resolve`, {
+      method: 'POST',
+    });
+  }
+
+  // Treatments
+  async getTreeTreatments(treeId: number): Promise<TreatmentRecord[]> {
+    return this.request<TreatmentRecord[]>(`/treatments/tree/${treeId}`);
+  }
+
+  async getFarmTreatments(farmId: number): Promise<TreatmentRecord[]> {
+    return this.request<TreatmentRecord[]>(`/treatments/farm/${farmId}`);
+  }
+
+  async logTreatment(payload: {
+    tree_id: number;
+    chemical_name: string;
+    dosage?: string;
+    operator_name?: string;
+    treatment_type?: string;
+    notes?: string;
+    update_tree_health?: boolean;
+    new_health_status?: string;
+  }): Promise<TreatmentRecord> {
+    return this.request<TreatmentRecord>('/treatments', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async batchTreatTrees(payload: import('../types').BatchTreatmentRequest): Promise<import('../types').BatchTreatmentResponse> {
+    return this.request<import('../types').BatchTreatmentResponse>('/treatments/batch', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+
+  // Advisories
+  async getAdvisories(): Promise<DiseaseAdvisory[]> {
+    return this.request<DiseaseAdvisory[]>('/advisories');
+  }
+
+  async getAdvisoryByName(diseaseName: string): Promise<DiseaseAdvisory> {
+    return this.request<DiseaseAdvisory>(`/advisories/${encodeURIComponent(diseaseName)}`);
+  }
+
+  // Export CSV URL
+  getExportAuditCsvUrl(farmId?: number): string {
+    const qs = farmId ? `?farm_id=${farmId}` : '';
+    return `${API_BASE_URL}/analytics/export/csv${qs}`;
   }
 }
 

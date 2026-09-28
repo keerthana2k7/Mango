@@ -12,6 +12,8 @@ class HealthDistribution(BaseModel):
     healthy_percentage: float
     diseased_count: int
     diseased_percentage: float
+    treated_count: int = 0
+    treated_percentage: float = 0.0
     unknown_count: int
     unknown_percentage: float
 

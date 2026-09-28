@@ -33,3 +33,27 @@ class SimulationStatusResponse(BaseModel):
     last_prediction: Optional[Dict[str, Any]] = None
     updated_at: datetime
 
+class SimulateDiseaseRequest(BaseModel):
+    disease_name: str = "Anthracnose"
+    tree_id: Optional[int] = None
+    severity: str = "HIGH"
+    operator_notes: Optional[str] = "Automated high-precision foliar simulation"
+
+class SimulateDiseaseResponse(BaseModel):
+    camera_id: int
+    farm_id: int
+    tree_id: int
+    tree_number: str
+    tree_health_status: str
+    disease_name: str
+    scientific_name: Optional[str] = None
+    confidence: float
+    severity: str
+    symptoms: Optional[str] = None
+    treatment_recommendation: Optional[str] = None
+    image_id: int
+    image_url: str
+    alert_id: Optional[int] = None
+    alert_severity: Optional[str] = None
+    simulation_status: SimulationStatusResponse
+

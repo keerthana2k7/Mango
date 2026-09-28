@@ -153,6 +153,19 @@ export const App: React.FC = () => {
     loadFarmData(selectedFarmId);
   };
 
+  const handleSimulateDisease = async (diseaseName: string, severity: string = 'HIGH', treeId?: number) => {
+    if (cameras.length === 0) return null;
+    const res = await api.simulateDisease(cameras[0].id, {
+      disease_name: diseaseName,
+      severity,
+      tree_id: treeId,
+      operator_notes: `Targeted foliar pathology simulation: ${diseaseName}`,
+    });
+    setSimulationStatus(res.simulation_status);
+    await loadFarmData(selectedFarmId);
+    return res;
+  };
+
   const handleSelectTreeNumber = (treeNumber: string) => {
     const target = trees.find((t) => t.tree_number === treeNumber);
     if (target) setSelectedTree(target);
@@ -184,9 +197,11 @@ export const App: React.FC = () => {
         <TopBar
           user={user}
           farms={farms}
+          trees={trees}
           selectedFarmId={selectedFarmId}
           onSelectFarm={setSelectedFarmId}
           isSimulating={isSimulating}
+          onSelectTreeNumber={handleSelectTreeNumber}
         />
 
         <main className="flex-1 p-8 max-w-7xl w-full mx-auto">
@@ -202,11 +217,13 @@ export const App: React.FC = () => {
               onStopSimulation={handleStopSim}
               onResetSimulation={handleResetSim}
               onStepSimulation={handleStepSim}
+              onSimulateDisease={handleSimulateDisease}
               onSelectTree={setSelectedTree}
               onSelectTreeNumber={handleSelectTreeNumber}
               onNavigateTab={setCurrentTab}
               speed={simSpeed}
               onSpeedChange={setSimSpeed}
+              onTreeUpdated={() => loadFarmData(selectedFarmId)}
             />
           )}
 
@@ -228,13 +245,16 @@ export const App: React.FC = () => {
               onStopSimulation={handleStopSim}
               onResetSimulation={handleResetSim}
               onStepSimulation={handleStepSim}
+              onSimulateDisease={handleSimulateDisease}
               onSelectTree={setSelectedTree}
               onSelectTreeNumber={handleSelectTreeNumber}
               onNavigateTab={setCurrentTab}
               speed={simSpeed}
               onSpeedChange={setSimSpeed}
+              onTreeUpdated={() => loadFarmData(selectedFarmId)}
             />
           )}
+
 
 
           {currentTab === 'predictions' && (
@@ -250,7 +270,11 @@ export const App: React.FC = () => {
       </div>
 
       {/* Tree Detail Inspector Modal */}
-      <TreeDetailModal tree={selectedTree} onClose={() => setSelectedTree(null)} />
+      <TreeDetailModal
+        tree={selectedTree}
+        onClose={() => setSelectedTree(null)}
+        onTreeUpdated={() => loadFarmData(selectedFarmId)}
+      />
     </div>
   );
 };
