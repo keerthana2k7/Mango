@@ -23,14 +23,30 @@ MangoVision is an intelligent agricultural monitoring and disease detection plat
 
 ---
 
+## Quick Start (Windows)
+
+You can run both services together or individually using the helper scripts:
+- **Run Full Stack**: Double-click `run_all.bat` or run `.\run_all.bat` in terminal.
+- **Run Backend Only**: Run `.\run_backend.bat`
+- **Run Frontend Only**: Run `.\run_web.bat`
+
+---
+
 ## Local Development Setup
 
 ### 1. Backend (FastAPI)
-```bash
+Using the configured project virtual environment (`backend/venv`):
+```powershell
 cd backend
-pip install -r requirements.txt
+.\venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --port 8000
 ```
+Or directly:
+```powershell
+cd backend
+.\venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+```
+
 
 ### 2. Web Application (React + Vite)
 ```bash
